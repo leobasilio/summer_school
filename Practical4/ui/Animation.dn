@@ -1,31 +1,186 @@
 uses ui.Rect
+uses media.PixelMap
 
-component provides ui.Animation {
+data Circle {
+  int centerX
+  int centerY
+  int radius
+  Color color
+}
+
+component provides ui.Animation requires time.Timer timer, data.adt.List, util.Math math {
 
   int lastX
   int lastY
+  int width
+  int height
 
-  Animation:Animation(){
+  List items = new List()
+  Mutex paintLock = new Mutex()
+  Mutex listLock = new Mutex()
+
+  Animation:Animation(Rect rect){
+
+    setPosition(rect.x, rect.y)
+
+    width = rect.width
+    height = rect.height
+    lastX = 0
+    lastY = 0
+
+    asynch::repainter()
+
   }
 
-void Animation:click(int x, int y, int button){}
+  void repainter(){
+
+    while(true){
+
+      mutex(listLock){
+        if(items.getLength() > 0){
+          postRepaint()
+        }
+      }
+
+      timer.sleep(20)
+
+    }
+
+  }
+
+  //===================================
+  // Helper functions
+  //===================================
+
+  int absSub(int a, int b){
+    if (a < b) {
+      return b-a
+    } else {
+      return a-b
+    }
+  }
+
+  void setPixelOnMap(PixelMap map, int x, int y, Color color){
+
+    int i = (x + y * map.size.width)*4
+
+    map.pixels[i]   = color.r
+    map.pixels[i+1] = color.g
+    map.pixels[i+2] = color.b
+    map.pixels[i+3] = color.a
+
+  }
+
+  void drawCircle(Canvas c, int centerX, int centerY, int radius, Color color){
+/*
+    PixelMap map = new PixelMap()
+
+    map.size = new WH()
+    map.size.width = radius*2
+    map.size.height = radius*2
+    map.pixels = new byte[radius*radius*16]
+
+    for(int y = 0 ; y < radius*2; y++){
+
+      for(int x = 0 ; x < radius*2; x++){
+
+        ...
+      }
+
+      int x = math.cos(a)*radius
+      int y = math.sin(a)*radius
+
+      if(x > radius){
+        x = radius
+      }
+
+      if(y > radius){
+        y = radius
+      }
+
+      setPixelOnMap(map, radius+x, radius-y, color)
+      setPixelOnMap(map, radius+x, radius+y, color)
+      setPixelOnMap(map, radius-x, radius-y, color)
+      setPixelOnMap(map, radius-x, radius+y, color)
+
+    }
+
+    c.drawPixels(map, centerX-radius, centerY-radius, 0)*/
+
+  }
+
+  //===================================
+  //===================================
 
   void Animation:mouseMove(int x, int y){
-    lastX = x
-    lastY = y
-    postRepaint()
+
+    if(absSub(x, lastX) >= 5 || absSub(y, lastY) >= 5){
+
+      lastX = x
+      lastY = y
+
+      Circle c = new Circle()
+
+      c.centerX = x
+      c.centerY = y
+      c.radius = 10
+      c.color = new Color(math.sin(y)*255, math.cos(x)*255, math.sin(x+y), 255)
+
+      mutex(listLock){
+        items.add(c)
+      }
+
+    }
+
   }
 
   void Animation:paint(Canvas c){
-    c.drawRect(new Rect2D(0, 0, 200, 200, new Color(0, lastX, lastY, 255)))
+
+    mutex(paintLock){
+
+      // Background
+      c.drawRect(new Rect2D(0, 0, width, height, new Color(255, 255, 255, 255)))
+
+      for(Circle item = items.getFirst() ; !items.isEnd() ; item = items.getNext()){
+
+        //drawCircle(c, item.centerX, item.centerY, item.radius, item.color)
+
+        dec pct = (255.0 - item.color.a) / 255
+
+        c.drawRect(new Rect2D(item.centerX-item.radius,
+                              item.centerY-item.radius,
+                              item.radius*2,
+                              item.radius*2,
+                              new Color(item.color.r + (pct * (255-item.color.r)),
+                                        item.color.g + (pct * (255-item.color.g)),
+                                        item.color.b + (pct * (255-item.color.b)), 255)))
+
+        item.radius = item.radius+1
+
+        if(item.color.a < 10){
+          item.color.a = 0
+        }else{
+          item.color.a = item.color.a - 10
+        }
+
+        if(item.color.a == 0){
+          mutex(listLock){
+            items.remove(item)
+          }
+        }
+
+      }
+
+    }
+
   }
 
   Rect Animation:getBounds(){
-    return new Rect(0, 0, 200, 200)
+    return new Rect(0, 0, width, height)
   }
 
+  void Animation:click(int x, int y, int button){}
   void Animation:postRepaint(){emitevent repaint()}
-
 	void Animation:setPosition(int x, int y){}
 	Point Animation:getPosition(){return null}
 	WH Animation:getPreferredSize(){return null}
