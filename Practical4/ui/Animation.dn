@@ -1,0 +1,33 @@
+uses ui.Rect
+
+component provides ui.Animation {
+
+  int lastX
+  int lastY
+
+  Animation:Animation(){
+  }
+
+void Animation:click(int x, int y, int button){}
+
+  void Animation:mouseMove(int x, int y){
+    lastX = x
+    lastY = y
+    postRepaint()
+  }
+
+  void Animation:paint(Canvas c){
+    c.drawRect(new Rect2D(0, 0, 200, 200, new Color(0, lastX, lastY, 255)))
+  }
+
+  Rect Animation:getBounds(){
+    return new Rect(0, 0, 200, 200)
+  }
+
+  void Animation:postRepaint(){emitevent repaint()}
+
+	void Animation:setPosition(int x, int y){}
+	Point Animation:getPosition(){return null}
+	WH Animation:getPreferredSize(){return null}
+
+}

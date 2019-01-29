@@ -1,0 +1,40 @@
+uses events.EventData
+
+component provides App requires ui.Window, ui.Animation {
+
+  Window window
+
+  Thread mainThread
+
+  Animation animation
+
+  eventsink AppEvents(EventData ed) {
+    if (ed.source === window && ed.type == Window.[close]) {
+      mainThread.signal()
+    }
+  }
+
+  int App:main(AppParam params[]) {
+
+		window = new Window("Animation")
+		window.setSize(200, 200)
+		window.setVisible(true)
+
+    animation = new Animation()
+
+    animation.setPosition(0, 0)
+
+    window.addObject(animation)
+
+    sinkevent AppEvents(window)
+
+    mainThread = this.thread
+    this.thread.wait()
+
+    window.close()
+
+    return 0
+
+  }
+
+}

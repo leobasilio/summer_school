@@ -39,7 +39,7 @@ component provides App requires Loader loader, composition.Adapter adapter,
 
 		// looking for components that provide requiredInterface
 		String compsPath[] = search.getComponents(sec.requiredInterfaces[0].package)
-		
+
 		//load mainComponent.o
 		IDC mainComponent = loader.load(rootCompPath)
 
@@ -50,7 +50,7 @@ component provides App requires Loader loader, composition.Adapter adapter,
 			variants[count].providedIntf = sec.requiredInterfaces[0].package
 			variants[count].comp = loader.load(compsPath[count].string)
 		}
-		
+
 		// continuing with WIRE(ing)
 		dana.rewire(mainComponent :> sec.requiredInterfaces[0].package,
 			variants[0].comp :< sec.requiredInterfaces[0].package)
@@ -59,9 +59,10 @@ component provides App requires Loader loader, composition.Adapter adapter,
 		obj.method()
 
 		// and ADAPT(ing)
-		adapter.adaptRequiredInterface(mainComponent, 
-			sec.requiredInterfaces[0].package, variants[1].comp)
-		obj.method()
+		for (int count = 1; count < compsPath.arrayLength; count++) {
+			  adapter.adaptRequiredInterface(mainComponent, sec.requiredInterfaces[0].package, variants[count].comp)
+				obj.method()
+		}
 
 		return 0
 	}

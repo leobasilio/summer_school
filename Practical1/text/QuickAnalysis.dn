@@ -1,0 +1,9 @@
+component provides Analysis requires data.StringUtil stringUtil {
+
+  int Analysis:countWords(char text[]){
+
+    return stringUtil.explode(text, ". ").arrayLength
+
+  }
+
+}

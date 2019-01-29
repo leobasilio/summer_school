@@ -1,0 +1,5 @@
+interface Analysis {
+
+  int countWords(char text[])
+
+}

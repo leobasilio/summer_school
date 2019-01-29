@@ -1,0 +1,15 @@
+component provides App requires io.Output out, io.Input in, data.IntUtil iu, text.Analysis analysis {
+
+  int App:main(AppParam params[]){
+
+    out.println("Type something: ")
+
+    char txt[] = in.readln()
+
+    out.println("You typed '$txt', which is $(iu.intToString(analysis.countWords(txt))) words long.")
+
+    return 0
+
+  }
+
+}

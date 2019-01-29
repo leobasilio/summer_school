@@ -1,0 +1,21 @@
+component provides Analysis {
+
+  int Analysis:countWords(char text[]){
+
+    int count = 1
+
+    for(int i = 0 ; i < text.arrayLength; i++){
+
+      if(text[i] == "." || text[i] == " "){
+
+        count++
+
+      }
+
+    }
+
+    return count
+
+  }
+
+}

@@ -2,7 +2,7 @@ uses events.EventData
 
 component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUtil iu, data.StringUtil strUtil {
 	Window window
-	
+
 	Button num0
 	Button num1
 	Button num2
@@ -15,7 +15,9 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 	Button num9
 
 	Button add
+	Button subtract
 	Button equals
+	Button clear
 
 	Label display
 
@@ -23,94 +25,128 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 
 	char currentDisplay[] 	= "0"
 	bool addPressed			= false
+	bool subtractPressed = false
+	bool equalsPressed = false
 	int n1 					= 0
 	int n2 					= 0
 
 	eventsink AppEvents(EventData ed) {
 		if (ed.type == Button.[click] && ed.source === num1) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "1"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "1")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num2) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "2"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "2")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num3) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "3"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "3")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num4) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "4"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "4")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num5) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "5"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "5")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num6) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "6"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "6")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num7) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "7"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "7")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num8) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "8"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "8")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num9) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "9"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "9")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === num0) {
-			if (currentDisplay == "0") {
+			if (currentDisplay == "0" || equalsPressed) {
 				currentDisplay = "0"
+				equalsPressed = false
 			} else {
 				currentDisplay = new char[](currentDisplay, "0")
 			}
 			display.setText(currentDisplay)
 		} else if (ed.type == Button.[click] && ed.source === add) {
-			if (!addPressed) {
+			if (!addPressed && !subtractPressed) {
 				n1 = iu.intFromString(currentDisplay)
 				currentDisplay = new char[](currentDisplay, "+")
 				addPressed = true
-				display.setText(currentDisplay)	
+				equalsPressed = false
+				display.setText(currentDisplay)
+			}
+		} else if (ed.type == Button.[click] && ed.source === subtract) {
+			if (!addPressed && !subtractPressed) {
+				n1 = iu.intFromString(currentDisplay)
+				currentDisplay = new char[](currentDisplay, "-")
+				subtractPressed = true
+				equalsPressed = false
+				display.setText(currentDisplay)
 			}
 		} else if (ed.type == Button.[click] && ed.source === equals) {
 			if (addPressed) {
 				n2 = iu.intFromString(strUtil.explode(currentDisplay, "+")[1].string)
 				currentDisplay = new char[](iu.intToString(n1 + n2))
 				addPressed = false
+				equalsPressed = true
+				display.setText(currentDisplay)
+			}else if(subtractPressed){
+				n2 = iu.intFromString(strUtil.explode(currentDisplay, "-")[1].string)
+				currentDisplay = new char[](iu.intToString(n1 - n2))
+				subtractPressed = false
+				equalsPressed = true
 				display.setText(currentDisplay)
 			}
+		} else if (ed.type == Button.[click] && ed.source === clear) {
+			currentDisplay = "0"
+			addPressed = false
+			subtractPressed = false
+			equalsPressed = false
+			display.setText("0")
 		} else if (ed.source === window && ed.type == Window.[close]) {
 			main.signal()
 		}
@@ -126,8 +162,10 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 		display.setColor(new Color(0, 0, 0, 255))
 
 		add 	= new Button("+")
+	 	subtract = new Button("-")
+		clear  = new Button("C")
 		equals  = new Button("=")
- 
+
 		num0 = new Button("0")
 		num1 = new Button("1")
 		num2 = new Button("2")
@@ -142,6 +180,8 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 		display.setPosition(5, 5)
 
 		add.setPosition(160, 30)
+		subtract.setPosition(160, 60)
+		clear.setPosition(160, 90)
 		equals.setPosition(160, 120)
 
 		num1.setPosition(10, 30)
@@ -154,10 +194,12 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 		num8.setPosition(55, 90)
 		num9.setPosition(100, 90)
 		num0.setPosition(55, 120)
-		
+
 		window.addObject(display)
 
 		window.addObject(add)
+		window.addObject(subtract)
+		window.addObject(clear)
 		window.addObject(equals)
 
 		window.addObject(num0)
@@ -182,6 +224,8 @@ component provides App requires ui.Window, ui.Button, ui.Label, Font, data.IntUt
 		sinkevent AppEvents(num8)
 		sinkevent AppEvents(num9)
 		sinkevent AppEvents(add)
+		sinkevent AppEvents(subtract)
+		sinkevent AppEvents(clear)
 		sinkevent AppEvents(equals)
 
 		sinkevent AppEvents(window)
