@@ -1,3 +1,5 @@
+uses time.DateTime
+
 // HTTPProxy
 //
 // Proxy that monitors response time from HTTPHandlers
@@ -6,8 +8,8 @@
 // February @ 2017
 const char debugMSG[] = "[@HTTPProxy]"
 
-component provides http.handler.GET.HTTPGET, monitoring.BeingMonitored requires io.Output out, 
-	http.handler.GET.HTTPGET, monitoring.Container {
+component provides http.handler.GET.HTTPGET, monitoring.BeingMonitored requires io.Output out,
+	http.handler.GET.HTTPGET, monitoring.Container, time.Calendar calendar, time.DateUtil dateUtil {
 
 	static Container monitor
 
@@ -21,7 +23,7 @@ component provides http.handler.GET.HTTPGET, monitoring.BeingMonitored requires 
 			if (monitor == null) { monitor = new Container() }
 			return monitor.getMetrics()
 		}
-	
+
 		void BeingMonitored:turnMonitorOn() {
 			if (monitor == null) { monitor = new Container() }
 			monitor.turnMonitorOn()
@@ -40,17 +42,15 @@ component provides http.handler.GET.HTTPGET, monitoring.BeingMonitored requires 
 				monitor.turnMonitorOn()
 			}
 
-			//TODO... metric and collection...
-			
-			
+			DateTime startTime = calendar.getTime()
+
 			HTTPGET httpGET = new HTTPGET()
 			httpGET.handleRequest(httpHeader)
-			
-			//TODO... metric and event collection
 
-			
-			monitor.addMetric("metric_example", 1, false)
-			monitor.addEvent("event_example", 1)
+			DateTime delta = dateUtil.diff(calendar.getTime(), startTime)
+
+			monitor.addMetric("tempo_resposta", delta.millisecond + delta.second*1000, false)
+			monitor.addEvent("n_requisicoes", 1)
 		}
 	}
 }

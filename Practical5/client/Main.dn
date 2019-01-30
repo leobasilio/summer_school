@@ -1,0 +1,62 @@
+
+component provides App requires io.Output out, net.http.HTTPRequest, data.IntUtil intUtil {
+
+  int numberOfRequests
+  int numberOfThreads
+  char url[]
+
+  Mutex numberOfRequestsLock = new Mutex()
+  Mutex numberOfThreadsLock  = new Mutex()
+
+  Thread mainThread
+
+  void sendRequest(int thNum){
+
+    while(true){
+      //out.println(" -- mutex enter :: $(intUtil.intToString(thNum))")
+      if(numberOfRequests == 0){
+        break
+      }
+      mutex(numberOfRequestsLock){
+        //out.println(" -- rq check $(intUtil.intToString(thNum)) || ")
+        //out.println(new char[](intUtil.intToString(numberOfRequests), ":", intUtil.intToString(thNum)))
+        numberOfRequests = numberOfRequests - 1
+      }
+      //out.println(" -- mutex exit :: $(intUtil.intToString(thNum))")
+      HTTPRequest request = new HTTPRequest()
+      request.get(url, null)
+    }
+
+    //out.println("Terminating threads... $(intUtil.intToString(numberOfThreads))")
+
+    mutex(numberOfThreadsLock){
+      numberOfThreads = numberOfThreads - 1
+      if(numberOfThreads == 0){
+        mainThread.signal()
+      }
+    }
+
+  }
+
+  int App:main(AppParam params[]) {
+
+    numberOfRequests = intUtil.intFromString(params[1].string)
+    numberOfThreads = intUtil.intFromString(params[2].string)
+
+    url = params[0].string
+
+    mainThread = this.thread
+
+    mutex(numberOfRequestsLock){
+      for(int i = 0 ; i < numberOfThreads ; i++){
+        asynch::sendRequest(i)
+      }
+    }
+
+    mainThread.wait()
+
+    return 0
+
+  }
+
+}
