@@ -1,0 +1,5 @@
+interface Profiler {
+  void startTiming(char message[])
+  void stopTiming()
+  int getDuration()
+}

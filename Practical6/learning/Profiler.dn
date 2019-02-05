@@ -1,0 +1,29 @@
+
+component provides Profiler requires time.Calendar calendar, io.Output out, time.DateUtil dateUtil, data.IntUtil intUtil {
+
+  transfer DateTime startTime
+  transfer bool timing
+  transfer int duration
+
+  void Profiler:startTiming(char message[]){
+    if(timing) stopTiming()
+    out.print("$(message)... ")
+    timing = true
+    duration = 0
+    startTime = calendar.getTime()
+  }
+
+  void Profiler:stopTiming(){
+    if(timing){
+      DateTime delta = dateUtil.diff(calendar.getTime(), startTime)
+      duration = delta.millisecond + delta.second*1000
+      out.println("$(intUtil.intToString(duration))ms")
+      timing = false
+    }
+  }
+
+  int Profiler:getDuration(){
+    return duration
+  }
+
+}
